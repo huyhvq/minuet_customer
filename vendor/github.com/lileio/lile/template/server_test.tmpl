@@ -1,0 +1,30 @@
+package server
+
+import (
+	"os"
+	"testing"
+
+	"google.golang.org/grpc"
+
+	"github.com/lileio/lile"
+	"{{ .RelDir }}"
+)
+
+var s = {{ .CamelCaseName }}Server{}
+var cli {{ .SnakeCaseName }}.{{ .CamelCaseName }}Client
+
+func TestMain(m *testing.M) {
+	impl := func(g *grpc.Server) {
+		{{ .SnakeCaseName }}.Register{{ .CamelCaseName }}Server(g, s)
+	}
+
+	gs := grpc.NewServer()
+	impl(gs)
+
+	addr, serve := lile.NewTestServer(gs)
+	go serve()
+
+	cli = {{ .SnakeCaseName }}.New{{ .CamelCaseName }}Client(lile.TestConn(addr))
+
+	os.Exit(m.Run())
+}
